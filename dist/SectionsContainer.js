@@ -29,7 +29,8 @@ var SectionsContainer = _react2['default'].createClass({
     activeClass: _react2['default'].PropTypes.string,
     sectionPaddingTop: _react2['default'].PropTypes.string,
     sectionPaddingBottom: _react2['default'].PropTypes.string,
-    arrowNavigation: _react2['default'].PropTypes.bool
+    arrowNavigation: _react2['default'].PropTypes.bool,
+    onSectionChange: _react2['default'].PropTypes.func
   },
 
   childContextTypes: {
@@ -188,6 +189,8 @@ var SectionsContainer = _react2['default'].createClass({
       sectionScrolledPosition: position
     });
 
+    this._invokeSectionChangeHandler(activeSection);
+
     setTimeout(function () {
       _this.setState({
         scrollingStarted: false
@@ -215,6 +218,7 @@ var SectionsContainer = _react2['default'].createClass({
       activeSection: index,
       sectionScrolledPosition: position
     });
+    this._invokeSectionChangeHandler(index);
   },
 
   _handleArrowKeys: function _handleArrowKeys(e) {
@@ -236,6 +240,13 @@ var SectionsContainer = _react2['default'].createClass({
     this._handleSectionTransition(index);
 
     this._addActiveClass();
+  },
+
+  _invokeSectionChangeHandler: function _invokeSectionChangeHandler(index) {
+    var handler = this.props.onSectionChange;
+    if (handler) {
+      handler(index);
+    }
   },
 
   renderNavigation: function renderNavigation() {

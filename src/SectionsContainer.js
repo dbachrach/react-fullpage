@@ -16,6 +16,7 @@ const SectionsContainer = React.createClass({
     sectionPaddingTop:      React.PropTypes.string,
     sectionPaddingBottom:   React.PropTypes.string,
     arrowNavigation:        React.PropTypes.bool,
+    onSectionChange:        React.PropTypes.func
   },
   
   childContextTypes: {
@@ -171,6 +172,8 @@ const SectionsContainer = React.createClass({
       scrollingStarted: true,
       sectionScrolledPosition: position
     });
+
+    this._invokeSectionChangeHandler(activeSection);
     
     setTimeout(() => {
       this.setState({
@@ -199,6 +202,7 @@ const SectionsContainer = React.createClass({
       activeSection: index,
       sectionScrolledPosition: position
     });
+    this._invokeSectionChangeHandler(index);
   },
   
   _handleArrowKeys(e) {
@@ -220,6 +224,13 @@ const SectionsContainer = React.createClass({
     this._handleSectionTransition(index);
     
     this._addActiveClass();
+  },
+
+  _invokeSectionChangeHandler(index) {
+    const handler = this.props.onSectionChange;
+    if (handler) {
+      handler(index);
+    }
   },
   
   renderNavigation() {
