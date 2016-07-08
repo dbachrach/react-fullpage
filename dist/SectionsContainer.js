@@ -26,6 +26,8 @@ var SectionsContainer = _react2['default'].createClass({
     sectionClassName: _react2['default'].PropTypes.string,
     navigationClass: _react2['default'].PropTypes.string,
     navigationAnchorClass: _react2['default'].PropTypes.string,
+    navigationAnchorCircleClass: _react2['default'].PropTypes.string,
+    navigationAnchorActiveClass: _react2['default'].PropTypes.string,
     activeClass: _react2['default'].PropTypes.string,
     sectionPaddingTop: _react2['default'].PropTypes.string,
     sectionPaddingBottom: _react2['default'].PropTypes.string,
@@ -180,7 +182,6 @@ var SectionsContainer = _react2['default'].createClass({
     var _this = this;
 
     this._removeMouseWheelEventHandlers();
-
     var e = window.event || e; // old IE support
     var delta = Math.max(-1, Math.min(1, e.wheelDelta || -e.detail));
     var position = this.state.sectionScrolledPosition + delta * this.state.windowHeight;
@@ -276,14 +277,22 @@ var SectionsContainer = _react2['default'].createClass({
     var anchors = this.props.anchors.map(function (link, index) {
       var anchorStyle = {
         display: 'block',
-        margin: '10px',
+        margin: '10px'
+      };
+
+      var circleStyle = {
+        display: 'block',
         borderRadius: '100%',
         backgroundColor: '#556270',
         padding: '5px',
         transition: 'all 0.2s',
         transform: _this2.state.activeSection === index ? 'scale(1.3)' : 'none'
       };
-      return _react2['default'].createElement('a', { href: '#' + link, key: index, className: _this2.props.navigationAnchorClass || 'Navigation-Anchor', style: _this2.props.navigationAnchorClass ? null : anchorStyle });
+      return _react2['default'].createElement(
+        'a',
+        { href: '#' + link, key: index, className: (_this2.props.navigationAnchorClass || 'Navigation-Anchor') + ' ' + (_this2.state.activeSection === index ? _this2.props.navigationAnchorActiveClass || 'Navigation-Anchor-Active' : ''), style: _this2.props.navigationAnchorClass ? null : anchorStyle },
+        _react2['default'].createElement('div', { className: _this2.props.navigationAnchorCircleClass || 'Navigation-Anchor-Circle', style: _this2.props.navigationAnchorCircleClass ? null : circleStyle })
+      );
     });
 
     return _react2['default'].createElement(

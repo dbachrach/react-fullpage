@@ -12,6 +12,8 @@ const SectionsContainer = React.createClass({
     sectionClassName:       React.PropTypes.string,
     navigationClass:        React.PropTypes.string,
     navigationAnchorClass:  React.PropTypes.string,
+    navigationAnchorCircleClass: React.PropTypes.string,
+    navigationAnchorActiveClass: React.PropTypes.string,
     activeClass:            React.PropTypes.string,
     sectionPaddingTop:      React.PropTypes.string,
     sectionPaddingBottom:   React.PropTypes.string,
@@ -164,7 +166,6 @@ const SectionsContainer = React.createClass({
   
   _mouseWheelHandler() {
     this._removeMouseWheelEventHandlers();
-    
     let e             = window.event || e; // old IE support
 	  let delta         = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
     let position      = this.state.sectionScrolledPosition + (delta * this.state.windowHeight);
@@ -259,13 +260,21 @@ const SectionsContainer = React.createClass({
       let anchorStyle = {
         display:          'block',
         margin:           '10px',
+      };
+
+      let circleStyle = {
+        display:          'block',
         borderRadius:     '100%',
         backgroundColor:  '#556270',
         padding:          '5px',
         transition:       'all 0.2s',
         transform:        this.state.activeSection === index ? 'scale(1.3)' : 'none'
       };
-      return <a href={`#${link}`} key={index} className={this.props.navigationAnchorClass || 'Navigation-Anchor'} style={this.props.navigationAnchorClass ? null : anchorStyle}></a>;
+      return (
+        <a href={`#${link}`} key={index} className={(this.props.navigationAnchorClass || 'Navigation-Anchor') + ' ' + (this.state.activeSection === index ? (this.props.navigationAnchorActiveClass || 'Navigation-Anchor-Active') : '')} style={this.props.navigationAnchorClass ? null : anchorStyle}>
+          <div className={this.props.navigationAnchorCircleClass || 'Navigation-Anchor-Circle'} style={this.props.navigationAnchorCircleClass ? null : circleStyle} />
+        </a>
+      );
     });
     
     return (
