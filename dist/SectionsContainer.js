@@ -79,6 +79,7 @@ var SectionsContainer = _react2['default'].createClass({
     window.removeEventListener('hashchange', this._handleAnchor);
     window.removeEventListener('keydown', this._handleArrowKeys);
 
+    this._removeOverflowFromBody();
     this._removeMouseWheelEventHandlers();
   },
 
@@ -140,7 +141,15 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   _addOverflowToBody: function _addOverflowToBody() {
-    document.querySelector('body').style.overflow = 'hidden';
+    var body = document.querySelector('body');
+    this.previousBodyOverflow = body.style.overflow || 'initial';
+    body.style.overflow = 'hidden';
+  },
+
+  _removeOverflowFromBody: function _removeOverflowFromBody() {
+    if (this.previousBodyOverflow) {
+      document.querySelector('body').style.overflow = this.previousBodyOverflow;
+    }
   },
 
   _addHeightToParents: function _addHeightToParents() {

@@ -65,6 +65,7 @@ const SectionsContainer = React.createClass({
     window.removeEventListener('hashchange', this._handleAnchor);
     window.removeEventListener('keydown', this._handleArrowKeys);
 
+    this._removeOverflowFromBody();
     this._removeMouseWheelEventHandlers();
   },
   
@@ -126,7 +127,15 @@ const SectionsContainer = React.createClass({
   },
   
   _addOverflowToBody() {
-    document.querySelector('body').style.overflow = 'hidden';
+    const body = document.querySelector('body');
+    this.previousBodyOverflow = body.style.overflow || 'initial';
+    body.style.overflow = 'hidden';
+  },
+
+  _removeOverflowFromBody() {
+    if (this.previousBodyOverflow) {
+      document.querySelector('body').style.overflow = this.previousBodyOverflow;
+    }
   },
   
   _addHeightToParents() {
