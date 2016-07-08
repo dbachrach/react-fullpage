@@ -76,6 +76,10 @@ var SectionsContainer = _react2['default'].createClass({
 
   componentWillUnmount: function componentWillUnmount() {
     window.removeEventListener('resize', this._handleResize);
+    window.removeEventListener('hashchange', this._handleAnchor);
+    window.removeEventListener('keydown', this._handleArrowKeys);
+
+    this._removeMouseWheelEventHandlers();
   },
 
   componentDidMount: function componentDidMount() {
