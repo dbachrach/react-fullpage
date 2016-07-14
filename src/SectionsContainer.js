@@ -63,27 +63,47 @@ const SectionsContainer = React.createClass({
   },
   
   componentWillUnmount() {
-    window.removeEventListener('resize', this._handleResize);
-    window.removeEventListener('hashchange', this._handleAnchor);
-    window.removeEventListener('keydown', this._handleArrowKeys);
-
-    this._removeOverflowFromBody();
-    this._removeMouseWheelEventHandlers();
+    this._detachScrollHandling();
   },
   
   componentDidMount() {
     window.addEventListener('resize', this._handleResize);
     
     if (!this.props.scrollBar) {
-      this._addCSS3Scroll();
-      this._handleAnchor(); //Go to anchor in case we found it in the URL
-      
-      window.addEventListener('hashchange', this._handleAnchor, false); //Add an event to watch the url hash changes
-      
-      if (this.props.arrowNavigation) {
-        window.addEventListener('keydown', this._handleArrowKeys);
+      this._attachScrollHandling();
+    }
+  },
+
+  componentWillReceiveProps(nextProps) {
+    if (this.props.scrollBar != nextProps.scrollBar) {
+      // If the scrollBar prop changes, we need to remove/attach scroll behavior
+      if (!nextProps.scrollBar) {
+        this._attachScrollHandling();
+      }
+      else {
+        this._detachScrollHandling();
       }
     }
+  },
+
+  _attachScrollHandling() {
+    this._addCSS3Scroll();
+    this._handleAnchor(); //Go to anchor in case we found it in the URL
+
+    window.addEventListener('hashchange', this._handleAnchor, false); //Add an event to watch the url hash changes
+      
+    if (this.props.arrowNavigation) {
+      window.addEventListener('keydown', this._handleArrowKeys);
+    }
+  },
+
+  _detachScrollHandling() {
+    window.removeEventListener('resize', this._handleResize);
+    window.removeEventListener('hashchange', this._handleAnchor);
+    window.removeEventListener('keydown', this._handleArrowKeys);
+
+    this._removeOverflowFromBody();
+    this._removeMouseWheelEventHandlers();
   },
   
   _addCSS3Scroll() {
