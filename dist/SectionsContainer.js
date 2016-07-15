@@ -218,6 +218,8 @@ var SectionsContainer = _react2['default'].createClass({
   _mouseWheelHandler: function _mouseWheelHandler(e) {
     var _this = this;
 
+    // This logic is adapted from https://github.com/alvarotrigo/fullPage.js/blob/master/jquery.fullPage.js
+
     e = e || window.event; // old IE support
     var value = e.wheelDelta || -e.deltaY || -e.detail;
     var delta = Math.max(-1, Math.min(1, value));
