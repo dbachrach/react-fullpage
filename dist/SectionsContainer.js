@@ -14,6 +14,19 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+function getAverage(elements, number) {
+  var sum = 0;
+
+  //taking `number` elements from the end to make the average, if there are not enought, 1
+  var lastElements = elements.slice(Math.max(elements.length - number, 1));
+
+  for (var i = 0; i < lastElements.length; i++) {
+    sum = sum + lastElements[i];
+  }
+
+  return Math.ceil(sum / number);
+}
+
 var SectionsContainer = _react2['default'].createClass({
   displayName: 'SectionsContainer',
 
@@ -43,9 +56,12 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   getInitialState: function getInitialState() {
+    this.prevTime = new Date().getTime();
+    this.scrollings = [];
+    this.scrollingStarted = false;
+
     return {
       activeSection: 0,
-      scrollingStarted: false,
       sectionScrolledPosition: 0,
       windowHeight: window.innerHeight
     };
@@ -188,48 +204,74 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   _addMouseWheelEventHandlers: function _addMouseWheelEventHandlers() {
+    window.addEventListener('wheel', this._mouseWheelHandler, false);
     window.addEventListener('mousewheel', this._mouseWheelHandler, false);
     window.addEventListener('DOMMouseScroll', this._mouseWheelHandler, false);
   },
 
   _removeMouseWheelEventHandlers: function _removeMouseWheelEventHandlers() {
+    window.removeEventListener('wheel', this._mouseWheelHandler);
     window.removeEventListener('mousewheel', this._mouseWheelHandler);
     window.removeEventListener('DOMMouseScroll', this._mouseWheelHandler);
   },
 
-  _mouseWheelHandler: function _mouseWheelHandler() {
+  _mouseWheelHandler: function _mouseWheelHandler(e) {
     var _this = this;
 
-    this._removeMouseWheelEventHandlers();
-    var e = window.event || e; // old IE support
-    var delta = Math.max(-1, Math.min(1, e.wheelDelta || -e.detail));
-    var position = this.state.sectionScrolledPosition + delta * this.state.windowHeight;
-    var activeSection = this.state.activeSection - delta;
-    var maxPosition = 0 - this.props.children.length * this.state.windowHeight;
+    e = e || window.event; // old IE support
+    var value = e.wheelDelta || -e.deltaY || -e.detail;
+    var delta = Math.max(-1, Math.min(1, value));
 
-    if (position > 0 || maxPosition === position || this.state.scrollingStarted) {
-      return this._addMouseWheelEventHandlers();
+    //Limiting the array to 150 (lets not waste memory!)
+    if (this.scrollings.length > 149) {
+      this.scrollings.shift();
     }
 
-    var index = this.props.anchors[activeSection];
-    if (!this.props.anchors.length || index) {
-      window.location.hash = '#' + index;
+    //keeping record of the previous scrollings
+    this.scrollings.push(Math.abs(value));
+
+    var curTime = new Date().getTime();
+    var timeDiff = curTime - this.prevTime;
+    this.prevTime = curTime;
+
+    //haven't they scrolled in a while?
+    //(enough to be consider a different scrolling action to scroll another section)
+    if (timeDiff > 200) {
+      //emptying the array, we dont care about old scrollings for our averages
+      this.scrollings = [];
     }
 
-    this.setState({
-      activeSection: activeSection,
-      scrollingStarted: true,
-      sectionScrolledPosition: position
-    });
+    var averageEnd = getAverage(this.scrollings, 10);
+    var averageMiddle = getAverage(this.scrollings, 70);
+    var isAccelerating = averageEnd >= averageMiddle;
 
-    this._invokeSectionChangeHandler(activeSection);
+    if (isAccelerating) {
+      var position = this.state.sectionScrolledPosition + delta * this.state.windowHeight;
+      var activeSection = this.state.activeSection - delta;
+      var maxPosition = 0 - this.props.children.length * this.state.windowHeight;
 
-    setTimeout(function () {
-      _this.setState({
-        scrollingStarted: false
+      if (delta === 0 || position > 0 || maxPosition === position || this.scrollingStarted) {
+        return;
+      }
+
+      var index = this.props.anchors[activeSection];
+      if (!this.props.anchors.length || index) {
+        window.location.hash = '#' + index;
+      }
+
+      this.scrollingStarted = true;
+
+      this.setState({
+        activeSection: activeSection,
+        sectionScrolledPosition: position
       });
-      _this._addMouseWheelEventHandlers();
-    }, this.props.delay + 300);
+
+      this._invokeSectionChangeHandler(activeSection);
+
+      setTimeout(function () {
+        _this.scrollingStarted = false;
+      }, this.props.delay);
+    }
   },
 
   _handleResize: function _handleResize() {
