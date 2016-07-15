@@ -45,6 +45,7 @@ const SectionsContainer = React.createClass({
     this.prevTime = new Date().getTime();
     this.scrollings = [];
     this.scrollingStarted = false;
+    this.heightCache = {};
 
     return {
       activeSection: 0,
@@ -98,6 +99,7 @@ const SectionsContainer = React.createClass({
       }
       else {
         this._detachScrollHandling();
+        this._handleSectionTransition(0);
       }
     }
   },
@@ -119,6 +121,7 @@ const SectionsContainer = React.createClass({
     window.removeEventListener('keydown', this._handleArrowKeys);
 
     this._removeOverflowFromBody();
+    this._removeHeightsFromParents();
     this._removeMouseWheelEventHandlers();
   },
   
@@ -182,7 +185,23 @@ const SectionsContainer = React.createClass({
     
     while (previousParent) {
       if ('style' in previousParent) {
+        this.heightCache[previousParent] = previousParent.style.height;
+
         previousParent.style.height = '100%';
+        previousParent = previousParent.parentNode;
+      } else {
+        return false;
+      }
+    }
+  },
+
+  _removeHeightsFromParents() {
+    let child = ReactDOM.findDOMNode(this);
+    let previousParent = child.parentNode;
+    
+    while (previousParent) {
+      if ('style' in previousParent) {
+        previousParent.style.height = this.heightCache[previousParent];
         previousParent = previousParent.parentNode;
       } else {
         return false;
@@ -353,7 +372,7 @@ const SectionsContainer = React.createClass({
       height:     '100%',
       width:      '100%',
       position:   'relative',
-      transform:  `translate3d(0px, ${this.state.sectionScrolledPosition}px, 0px)`,
+      transform:  this.props.scrollBar ? '' : `translate3d(0px, ${this.state.sectionScrolledPosition}px, 0px)`,
       transition: `all ${this.props.delay}ms ease`,
     };
     return (

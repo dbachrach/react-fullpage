@@ -59,6 +59,7 @@ var SectionsContainer = _react2['default'].createClass({
     this.prevTime = new Date().getTime();
     this.scrollings = [];
     this.scrollingStarted = false;
+    this.heightCache = {};
 
     return {
       activeSection: 0,
@@ -111,6 +112,7 @@ var SectionsContainer = _react2['default'].createClass({
         this._attachScrollHandling();
       } else {
         this._detachScrollHandling();
+        this._handleSectionTransition(0);
       }
     }
   },
@@ -132,6 +134,7 @@ var SectionsContainer = _react2['default'].createClass({
     window.removeEventListener('keydown', this._handleArrowKeys);
 
     this._removeOverflowFromBody();
+    this._removeHeightsFromParents();
     this._removeMouseWheelEventHandlers();
   },
 
@@ -195,7 +198,23 @@ var SectionsContainer = _react2['default'].createClass({
 
     while (previousParent) {
       if ('style' in previousParent) {
+        this.heightCache[previousParent] = previousParent.style.height;
+
         previousParent.style.height = '100%';
+        previousParent = previousParent.parentNode;
+      } else {
+        return false;
+      }
+    }
+  },
+
+  _removeHeightsFromParents: function _removeHeightsFromParents() {
+    var child = _reactDom2['default'].findDOMNode(this);
+    var previousParent = child.parentNode;
+
+    while (previousParent) {
+      if ('style' in previousParent) {
+        previousParent.style.height = this.heightCache[previousParent];
         previousParent = previousParent.parentNode;
       } else {
         return false;
@@ -370,7 +389,7 @@ var SectionsContainer = _react2['default'].createClass({
       height: '100%',
       width: '100%',
       position: 'relative',
-      transform: 'translate3d(0px, ' + this.state.sectionScrolledPosition + 'px, 0px)',
+      transform: this.props.scrollBar ? '' : 'translate3d(0px, ' + this.state.sectionScrolledPosition + 'px, 0px)',
       transition: 'all ' + this.props.delay + 'ms ease'
     };
     return _react2['default'].createElement(
