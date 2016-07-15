@@ -372,7 +372,7 @@ const SectionsContainer = React.createClass({
       height:     '100%',
       width:      '100%',
       position:   'relative',
-      transform:  this.props.scrollBar ? '' : `translate3d(0px, ${this.state.sectionScrolledPosition}px, 0px)`,
+      transform:  this.props.scrollBar ? 'none' : `translate3d(0px, ${this.state.sectionScrolledPosition}px, 0px)`,
       transition: `all ${this.props.delay}ms ease`,
     };
     return (
