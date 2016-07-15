@@ -203,6 +203,8 @@ const SectionsContainer = React.createClass({
   },
   
   _mouseWheelHandler(e) {
+    // This logic is adapted from https://github.com/alvarotrigo/fullPage.js/blob/master/jquery.fullPage.js
+    
     e         = e || window.event; // old IE support
     let value = e.wheelDelta || -e.deltaY || -e.detail;
 	  let delta = Math.max(-1, Math.min(1, value));
