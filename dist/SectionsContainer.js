@@ -52,7 +52,8 @@ var SectionsContainer = _react2['default'].createClass({
     verticalAlign: _react2['default'].PropTypes.bool,
     sectionClassName: _react2['default'].PropTypes.string,
     sectionPaddingTop: _react2['default'].PropTypes.string,
-    sectionPaddingBottom: _react2['default'].PropTypes.string
+    sectionPaddingBottom: _react2['default'].PropTypes.string,
+    fullpage: _react2['default'].PropTypes.object
   },
 
   getInitialState: function getInitialState() {
@@ -60,6 +61,7 @@ var SectionsContainer = _react2['default'].createClass({
     this.scrollings = [];
     this.scrollingStarted = false;
     this.heightCache = {};
+    this.canScroll = true;
 
     return {
       activeSection: 0,
@@ -85,11 +87,18 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   getChildContext: function getChildContext() {
+    var _this = this;
+
     return {
       verticalAlign: this.props.verticalAlign,
       sectionClassName: this.props.sectionClassName,
       sectionPaddingTop: this.props.sectionPaddingTop,
-      sectionPaddingBottom: this.props.sectionPaddingBottom
+      sectionPaddingBottom: this.props.sectionPaddingBottom,
+      fullpage: {
+        setScrollingEnabled: function setScrollingEnabled(enabled) {
+          _this.canScroll = enabled;
+        }
+      }
     };
   },
 
@@ -235,9 +244,12 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   _mouseWheelHandler: function _mouseWheelHandler(e) {
-    var _this = this;
+    var _this2 = this;
 
     // This logic is adapted from https://github.com/alvarotrigo/fullPage.js/blob/master/jquery.fullPage.js
+    if (!this.canScroll) {
+      return;
+    }
 
     e = e || window.event; // old IE support
     var value = e.wheelDelta || -e.deltaY || -e.detail;
@@ -290,7 +302,7 @@ var SectionsContainer = _react2['default'].createClass({
       this._invokeSectionChangeHandler(activeSection);
 
       setTimeout(function () {
-        _this.scrollingStarted = false;
+        _this2.scrollingStarted = false;
       }, this.props.delay);
     }
   },
@@ -304,6 +316,10 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   _handleSectionTransition: function _handleSectionTransition(index) {
+    if (!this.canScroll) {
+      return;
+    }
+
     var position = 0 - index * this.state.windowHeight;
 
     if (!this.props.anchors.length || index === -1 || index >= this.props.anchors.length) {
@@ -318,6 +334,10 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   _handleArrowKeys: function _handleArrowKeys(e) {
+    if (!this.canScroll) {
+      return;
+    }
+
     var event = window.event ? window.event : e;
     var direction = event.keyCode === 38 || event.keyCode === 37 ? this.state.activeSection - 1 : event.keyCode === 40 || event.keyCode === 39 ? this.state.activeSection + 1 : -1;
     var hash = this.props.anchors[direction];
@@ -330,6 +350,10 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   _handleAnchor: function _handleAnchor() {
+    if (!this.canScroll) {
+      return;
+    }
+
     var hash = window.location.hash.substring(1);
     var index = this.props.anchors.indexOf(hash);
 
@@ -346,7 +370,7 @@ var SectionsContainer = _react2['default'].createClass({
   },
 
   renderNavigation: function renderNavigation() {
-    var _this2 = this;
+    var _this3 = this;
 
     var navigationStyle = {
       position: 'fixed',
@@ -368,12 +392,12 @@ var SectionsContainer = _react2['default'].createClass({
         backgroundColor: '#556270',
         padding: '5px',
         transition: 'all 0.2s',
-        transform: _this2.state.activeSection === index ? 'scale(1.3)' : 'none'
+        transform: _this3.state.activeSection === index ? 'scale(1.3)' : 'none'
       };
       return _react2['default'].createElement(
         'a',
-        { href: '#' + link, key: index, className: (_this2.props.navigationAnchorClass || 'Navigation-Anchor') + ' ' + (_this2.state.activeSection === index ? _this2.props.navigationAnchorActiveClass || 'Navigation-Anchor-Active' : ''), style: _this2.props.navigationAnchorClass ? null : anchorStyle },
-        _react2['default'].createElement('div', { className: _this2.props.navigationAnchorCircleClass || 'Navigation-Anchor-Circle', style: _this2.props.navigationAnchorCircleClass ? null : circleStyle })
+        { href: '#' + link, key: index, className: (_this3.props.navigationAnchorClass || 'Navigation-Anchor') + ' ' + (_this3.state.activeSection === index ? _this3.props.navigationAnchorActiveClass || 'Navigation-Anchor-Active' : ''), style: _this3.props.navigationAnchorClass ? null : anchorStyle },
+        _react2['default'].createElement('div', { className: _this3.props.navigationAnchorCircleClass || 'Navigation-Anchor-Circle', style: _this3.props.navigationAnchorCircleClass ? null : circleStyle })
       );
     });
 

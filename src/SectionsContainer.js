@@ -39,6 +39,7 @@ const SectionsContainer = React.createClass({
      sectionClassName:       React.PropTypes.string,
      sectionPaddingTop:      React.PropTypes.string,
      sectionPaddingBottom:   React.PropTypes.string,
+     fullpage:               React.PropTypes.object
   },
   
   getInitialState() {
@@ -46,6 +47,7 @@ const SectionsContainer = React.createClass({
     this.scrollings = [];
     this.scrollingStarted = false;
     this.heightCache = {};
+    this.canScroll = true;
 
     return {
       activeSection: 0,
@@ -76,6 +78,11 @@ const SectionsContainer = React.createClass({
        sectionClassName:       this.props.sectionClassName,
        sectionPaddingTop:      this.props.sectionPaddingTop,
        sectionPaddingBottom:   this.props.sectionPaddingBottom,
+       fullpage: {
+        setScrollingEnabled: (enabled) => {
+          this.canScroll = enabled;
+        }
+       }
      };
   },
   
@@ -223,7 +230,8 @@ const SectionsContainer = React.createClass({
   
   _mouseWheelHandler(e) {
     // This logic is adapted from https://github.com/alvarotrigo/fullPage.js/blob/master/jquery.fullPage.js
-    
+    if (!this.canScroll) { return; }
+
     e         = e || window.event; // old IE support
     let value = e.wheelDelta || -e.deltaY || -e.detail;
 	  let delta = Math.max(-1, Math.min(1, value));
@@ -289,6 +297,8 @@ const SectionsContainer = React.createClass({
   },
   
   _handleSectionTransition(index) {
+    if (!this.canScroll) { return; }
+
     let position = 0 - (index * this.state.windowHeight);
     
     if (!this.props.anchors.length || index === -1 || index >= this.props.anchors.length) {
@@ -303,6 +313,8 @@ const SectionsContainer = React.createClass({
   },
   
   _handleArrowKeys(e) {
+    if (!this.canScroll) { return; }
+
     let event     = window.event ? window.event : e;
     let direction = event.keyCode === 38 || event.keyCode === 37 ? this.state.activeSection - 1 : (event.keyCode === 40 || event.keyCode === 39 ? this.state.activeSection + 1 : -1);
     let hash      = this.props.anchors[direction];
@@ -315,6 +327,8 @@ const SectionsContainer = React.createClass({
   },
   
   _handleAnchor() {
+    if (!this.canScroll) { return; }
+
     let hash  = window.location.hash.substring(1);
     let index = this.props.anchors.indexOf(hash);
     
